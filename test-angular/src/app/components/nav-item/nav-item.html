@@ -1,0 +1,14 @@
+<nav class="nav-container">
+    <ul class="nav-list">
+        @for (item of navItems(); track item.id) {
+        <li class="nav-item">
+            <a [routerLink]="item.url" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+                class="nav-link">
+                {{ item.label }}
+            </a>
+        </li>
+        } @empty {
+        <li class="empty-state">No links available</li>
+        }
+    </ul>
+</nav>

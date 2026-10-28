@@ -1,0 +1,193 @@
+<div class="p-6 max-w-4xl mx-auto space-y-8">
+  <h2 class="text-2xl font-bold text-gray-800">🚀 Angular Declarative Template Syntax Playground</h2>
+
+  <!-- 1. @if / @else if / @else with alias (as) -->
+  <section class="p-4 border rounded-lg bg-white shadow-sm space-y-3">
+    <h3 class="text-lg font-semibold text-blue-600">1. &#64;if / &#64;else if / &#64;else</h3>
+
+    <div class="flex items-center gap-2">
+      <span>Score: <strong>{{ score() }}</strong></span>
+      <button class="px-3 py-1 bg-green-600 text-white rounded text-sm" (click)="setScore(90)">90 (A+)</button>
+      <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm" (click)="setScore(75)">75 (A)</button>
+      <button class="px-3 py-1 bg-yellow-500 text-white rounded text-sm" (click)="setScore(50)">50 (B)</button>
+      <button class="px-3 py-1 bg-red-600 text-white rounded text-sm" (click)="setScore(30)">30 (Fail)</button>
+    </div>
+
+    <div class="p-3 rounded bg-gray-50 border">
+      @if (score() >= 80; as currentScore) {
+        <p class="text-green-700 font-medium">🎉 Grade: A+ (Excellent! Condition truthy value: {{ currentScore }})</p>
+      } @else if (score() >= 60) {
+        <p class="text-blue-700 font-medium">👍 Grade: A (Good job! Score: {{ score() }})</p>
+      } @else if (score() >= 40) {
+        <p class="text-yellow-700 font-medium">🙂 Grade: B (Passed! Score: {{ score() }})</p>
+      } @else {
+        <p class="text-red-700 font-medium">❌ Grade: F (Failed! Score: {{ score() }})</p>
+      }
+    </div>
+  </section>
+
+  <!-- 2. @switch / @case / @default -->
+  <section class="p-4 border rounded-lg bg-white shadow-sm space-y-3">
+    <h3 class="text-lg font-semibold text-purple-600">2. &#64;switch / &#64;case / &#64;default</h3>
+
+    <div class="flex flex-wrap gap-2">
+      @for (st of statuses; track st) {
+        <button
+          class="px-3 py-1 rounded text-sm border capitalize"
+          [class.bg-purple-600]="status() === st"
+          [class.text-white]="status() === st"
+          (click)="setStatus(st)">
+          {{ st }}
+        </button>
+      }
+    </div>
+
+    <div class="p-3 rounded bg-gray-50 border">
+      @switch (status()) {
+        @case ('pending') {
+          <p class="text-amber-600 font-medium">⏳ Order is pending confirmation.</p>
+        }
+        @case ('processing') {
+          <p class="text-blue-600 font-medium">⚙️ Order is being packed in the warehouse.</p>
+        }
+        @case ('shipped') {
+          <p class="text-indigo-600 font-medium">🚚 Order is on the way!</p>
+        }
+        @case ('delivered') {
+          <p class="text-green-600 font-medium">✅ Order has been delivered successfully.</p>
+        }
+        @default {
+          <p class="text-red-600 font-medium">🚫 Order was cancelled or unknown status.</p>
+        }
+      }
+    </div>
+  </section>
+
+  <!-- 3. @for / @empty + Contextual Variables + @let -->
+  <section class="p-4 border rounded-lg bg-white shadow-sm space-y-3">
+    <div class="flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-emerald-600">
+        3. &#64;for / &#64;empty (Contextual Variables) &amp; &#64;let
+      </h3>
+      <div class="flex gap-2">
+        <button class="px-3 py-1 bg-red-500 text-white rounded text-sm" (click)="clearProducts()">
+          Clear All (Test &#64;empty)
+        </button>
+        <button class="px-3 py-1 bg-emerald-600 text-white rounded text-sm" (click)="resetProducts()">
+          Reset List
+        </button>
+      </div>
+    </div>
+
+    <!-- @let local template variable for overall summary -->
+    @let totalItems = products().length;
+
+    <p class="text-sm text-gray-600">Total Products via <code>&#64;let</code>: <strong>{{ totalItems }}</strong></p>
+
+    <ul class="space-y-2">
+      @for (
+        item of products();
+        track item.id;
+        let idx = $index, total = $count, isFirst = $first, isLast = $last, isEven = $even, isOdd = $odd
+      ) {
+        <!-- @let inside @for loop -->
+        @let taxAmount = item.price * taxRate();
+        @let finalPrice = item.price + taxAmount;
+
+        <li
+          class="p-3 rounded border flex items-center justify-between"
+          [class.bg-slate-50]="isEven"
+          [class.bg-white]="isOdd"
+          [class.border-emerald-500]="isFirst || isLast">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-gray-700">#{{ idx + 1 }} of {{ total }}</span>
+              <span class="font-semibold">{{ item.name }}</span>
+
+              @if (isFirst) {
+                <span class="px-2 py-0.5 text-xs bg-emerald-100 text-emerald-800 rounded">First ($first)</span>
+              }
+              @if (isLast) {
+                <span class="px-2 py-0.5 text-xs bg-indigo-100 text-indigo-800 rounded">Last ($last)</span>
+              }
+              <span class="px-2 py-0.5 text-xs bg-gray-200 text-gray-700 rounded">
+                {{ isEven ? '$even' : '$odd' }}
+              </span>
+            </div>
+
+            <div class="text-sm text-gray-600">
+              Base: ${{ item.price }} | Tax (15% via <code>&#64;let</code>): ${{ taxAmount }} |
+              <strong>Total: ${{ finalPrice }}</strong> |
+              @if (item.stock > 5) {
+                <span class="text-green-600">In Stock ({{ item.stock }})</span>
+              } @else if (item.stock > 0) {
+                <span class="text-amber-600">Low Stock ({{ item.stock }})</span>
+              } @else {
+                <span class="text-red-600">Out of Stock</span>
+              }
+            </div>
+          </div>
+
+          <button
+            class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
+            (click)="removeProduct(item.id)">
+            Remove
+          </button>
+        </li>
+      } @empty {
+        <li class="p-6 text-center bg-amber-50 border border-amber-200 rounded text-amber-800">
+          📭 No products found! (Rendered via <code>&#64;empty</code> block)
+        </li>
+      }
+    </ul>
+  </section>
+
+  <!-- 4. @defer / @placeholder / @loading / @error -->
+  <section class="p-4 border rounded-lg bg-white shadow-sm space-y-3">
+    <h3 class="text-lg font-semibold text-orange-600">
+      4. &#64;defer / &#64;placeholder / &#64;loading / &#64;error
+    </h3>
+
+    <div class="space-y-3">
+      <!-- Trigger 1: On Interaction -->
+      <div class="p-3 border rounded bg-gray-50">
+        @defer (on interaction) {
+          <div class="p-3 bg-green-100 text-green-900 rounded">
+            ✅ <strong>Deferred Content Loaded (on interaction)!</strong> This block was only rendered after you clicked the placeholder.
+          </div>
+        } @placeholder (minimum 300ms) {
+          <button class="px-4 py-2 bg-orange-500 text-white rounded cursor-pointer">
+            👆 Click here to trigger <code>&#64;defer (on interaction)</code>
+          </button>
+        } @loading (minimum 500ms; after 0ms) {
+          <p class="text-blue-600 animate-pulse">⏳ Loading deferred content...</p>
+        } @error {
+          <p class="text-red-600">❌ Failed to load deferred block.</p>
+        }
+      </div>
+
+      <!-- Trigger 2: When Condition (when signal()) -->
+      <div class="p-3 border rounded bg-gray-50 space-y-2">
+        <button
+          class="px-3 py-1 bg-indigo-600 text-white rounded text-sm"
+          (click)="loadDeferred.set(true)">
+          Trigger <code>&#64;defer (when loadDeferred())</code>
+        </button>
+
+        @defer (when loadDeferred()) {
+          <div class="p-3 bg-indigo-100 text-indigo-900 rounded">
+            🎉 <strong>Condition-based Deferred Content Loaded!</strong> Triggered because <code>loadDeferred()</code> became <code>true</code>.
+          </div>
+        } @placeholder {
+          <p class="text-gray-500 text-sm italic">
+            Waiting for <code>loadDeferred()</code> signal to become true (<code>&#64;placeholder</code>)...
+          </p>
+        } @loading (minimum 400ms) {
+          <p class="text-indigo-600 text-sm">🔄 Loading block...</p>
+        } @error {
+          <p class="text-red-600 text-sm">⚠️ Error loading component.</p>
+        }
+      </div>
+    </div>
+  </section>
+</div>
